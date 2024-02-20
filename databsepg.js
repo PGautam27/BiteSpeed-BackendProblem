@@ -47,7 +47,7 @@ const postContact = async (req) => {
   //   } else {
   //   }
 
-  const x = await insertIntoContact("gautamappu0@gmail.com", "343");
+  const x = await insertIntoContact("hello@gmail.com", "5566448");
 };
 
 // const insertIntoContact = async (email, phoneNumber) => {
@@ -182,11 +182,26 @@ const insertIntoContact = async (email, phoneNumber) => {
     }
   }
 
-  client.end();
-
   let cntId = [];
-  let phoneNumbers = [morePrimary[0].phonenumber];
-  let emails = [morePrimary[0].email];
+  let phoneNumbers = [];
+  let emails = [];
+  let primaryContatctId = "";
+
+  if (contacts.rows.length === 0) {
+    phoneNumber = [phoneNumber];
+    emails = [email];
+
+    let currItem = await client.query(`
+      select ids from contact 
+      where phonenumber = '${phoneNumber}' and email = '${email}'
+    `);
+    console.log(currItem.rows[0].ids);
+    primaryContatctId = currItem.rows[0].ids;
+  } else {
+    phoneNumbers = [morePrimary[0].phonenumber];
+    emails = [morePrimary[0].email];
+    primaryContatctId = morePrimary[0].ids;
+  }
 
   data.forEach((e) => {
     if (e.ids !== morePrimary[0].ids) {
@@ -198,7 +213,7 @@ const insertIntoContact = async (email, phoneNumber) => {
 
   let retrnObj = {
     contact: {
-      primaryContatctId: morePrimary[0].ids,
+      primaryContatctId: primaryContatctId,
       emails: emails,
       phoneNumbers: phoneNumbers,
       secondaryContactIds: cntId,
@@ -206,6 +221,8 @@ const insertIntoContact = async (email, phoneNumber) => {
   };
 
   console.log(retrnObj);
+
+  client.end();
 };
 
 postContact();
