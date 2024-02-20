@@ -8,19 +8,6 @@ const client = new Client({
   database: "postgres",
 });
 
-const postContact = async (req) => {
-  const isemailNull = req.email === null || req.email === undefined;
-  const isphoneNumber =
-    req.phoneNumber === null || req.phoneNumber === undefined;
-
-  if (isemailNull && isphoneNumber) {
-    return { message: "NOT VALID CONTACT" };
-  } else {
-  }
-
-  const x = await insertIntoContact("mello@gmail.com");
-};
-
 const createContactTable = async () => {
   client.connect();
 
@@ -41,15 +28,19 @@ const createContactTable = async () => {
 const insertIntoContact = async (email, phoneNumber) => {
   client.connect();
 
+  // Check if email is null or undefined
   if (email === undefined || email === null) {
     email = "null";
   }
 
+  // Check if phoneNumber is null or undefined
   if (phoneNumber === undefined || phoneNumber === null) {
     phoneNumber = "null";
   }
 
   let data = [];
+
+  // Get all the data which have either the same phone number or email. But at least one must be present
   const contacts = await client.query(
     `
       SELECT *
@@ -58,11 +49,11 @@ const insertIntoContact = async (email, phoneNumber) => {
       AND (phonenumber IS NOT NULL OR email IS NOT NULL);
     `
   );
-
-  console.log(contacts.rows);
-
   data = contacts.rows;
+
   let morePrimary = [];
+
+  // if the data got is empty then insert the phonenumber and email as a new primary linkedprecedence entry
   if (contacts.rows.length === 0) {
     await client.query(`
         insert into contact(phoneNumber, email,linkprecedence,createdat,updatedat)
@@ -75,6 +66,7 @@ const insertIntoContact = async (email, phoneNumber) => {
 
     console.log("This is the more primary one", morePrimary);
 
+    // if the the filtered primary array has no primary contact item then get the primary item that the earliest made secondary item linkedId refers to.
     if (morePrimary.length === 0) {
       console.log("This is when primary is 0");
       let firstSec = data.sort(
@@ -92,6 +84,7 @@ const insertIntoContact = async (email, phoneNumber) => {
       morePrimary.push(primaryRec.rows[0]);
     }
 
+    // if there are more than one primary key make the rest of contact item refer to the primary item which was made the earliest
     if (morePrimary.length > 1) {
       morePrimary.sort(
         (a, b) =>
@@ -100,6 +93,7 @@ const insertIntoContact = async (email, phoneNumber) => {
 
       let smlRec = morePrimary[0];
 
+      // update the data with primary linkedprecedence contact to secondary linkedprecedence
       data.map((cntct) => {
         if (cntct.ids === smlRec.ids) {
           cntct.updatedat = new Date().toISOString();
@@ -112,8 +106,7 @@ const insertIntoContact = async (email, phoneNumber) => {
         }
       });
 
-      console.log("This is the secondary data", data);
-
+      // Update the db
       for (let contact of data) {
         if ((contact.ids = smlRec.ids)) {
           await client.query(`
@@ -132,6 +125,7 @@ const insertIntoContact = async (email, phoneNumber) => {
 
     let recAbst = true;
 
+    // Check whether the incoming phone number and email both already exists as one contact record or not
     data.forEach((e) => {
       if (email === e.email && phoneNumber === e.phonenumber) {
         recAbst = false;
@@ -140,6 +134,7 @@ const insertIntoContact = async (email, phoneNumber) => {
 
     console.log(recAbst);
 
+    // if it doesn't exist then create a new secondary precedence contact entry.
     if (recAbst) {
       await client.query(`
         insert into contact(phonenumber,email,linkedid, linkprecedence,createdat, updatedat)
@@ -155,6 +150,7 @@ const insertIntoContact = async (email, phoneNumber) => {
   let emails = [];
   let primaryContatctId = "";
 
+  // Initialize the arrays and set the primarycontactId
   if (contacts.rows.length === 0) {
     phoneNumber = [phoneNumber];
     emails = [email];
@@ -171,12 +167,13 @@ const insertIntoContact = async (email, phoneNumber) => {
     primaryContatctId = morePrimary[0].ids;
   }
 
+  // Get all the items with either the phonenumber or email present with linkprecedence being secondary
   let items = await client.query(`
- SELECT *
-      FROM Contact
-      WHERE (phonenumber = '${phoneNumber}' OR email = '${email}')
-      AND (phonenumber IS NOT NULL OR email IS NOT NULL)
-      AND (linkprecedence = 'secondary')
+  SELECT *
+        FROM Contact
+        WHERE (phonenumber = '${phoneNumber}' OR email = '${email}')
+        AND (phonenumber IS NOT NULL OR email IS NOT NULL)
+        AND (linkprecedence = 'secondary')
   `);
 
   // If repeated email and phone number is not allowed, uncomment it out if you would want it.
@@ -198,6 +195,7 @@ const insertIntoContact = async (email, phoneNumber) => {
     emails.push(e.email);
   });
 
+  // Create the return object
   let retrnObj = {
     contact: {
       primaryContatctId: primaryContatctId,
@@ -207,9 +205,13 @@ const insertIntoContact = async (email, phoneNumber) => {
     },
   };
 
+  client.end();
+
   console.log(retrnObj);
 
-  client.end();
+  return retrnObj;
 };
 
-postContact();
+module.exports = {
+  insertIntoContact,
+};
