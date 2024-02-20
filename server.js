@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(cors());
-// const router = require("./src/routes/routes");
-// app.use("/", router);
+const router = require("./src/routes/router");
+app.use("/", router);
 
 app.listen(port);

@@ -3,14 +3,17 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/identify", async (req, res) => {
-  const isemailNull = req.email === null || req.email === undefined;
-  const isphoneNumber =
-    req.phoneNumber === null || req.phoneNumber === undefined;
+  let { email, phoneNumber } = req.body;
+
+  const isemailNull = email === null || email === undefined;
+  const isphoneNumber = phoneNumber === null || phoneNumber === undefined;
 
   if (isemailNull && isphoneNumber) {
     res.status(400).json({ message: "NOT VALID CONTACT" });
   } else {
-    const contactObj = await insertIntoContact(req.email, req.phoneNumber);
+    const contactObj = await insertIntoContact(email, phoneNumber);
     res.status(200).json(contactObj);
   }
 });
+
+module.exports = router;
