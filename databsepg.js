@@ -9,8 +9,6 @@ const client = new Client({
   database: "postgres",
 });
 
-client.connect();
-
 // client.query(
 //   `
 //     SELECT *
@@ -47,7 +45,7 @@ const postContact = async (req) => {
   //   } else {
   //   }
 
-  const x = await insertIntoContact("hello@gmail.com", "5566448");
+  const x = await insertIntoContact("mello@gmail.com");
 };
 
 // const insertIntoContact = async (email, phoneNumber) => {
@@ -73,6 +71,8 @@ const postContact = async (req) => {
 // };
 
 const insertIntoContact = async (email, phoneNumber) => {
+  client.connect();
+
   if (email === undefined || email === null) {
     email = "null";
   }
@@ -203,12 +203,31 @@ const insertIntoContact = async (email, phoneNumber) => {
     primaryContatctId = morePrimary[0].ids;
   }
 
-  data.forEach((e) => {
-    if (e.ids !== morePrimary[0].ids) {
-      cntId.push(e.ids);
-      phoneNumbers.push(e.phonenumber);
-      emails.push(e.email);
-    }
+  let items = await client.query(`
+ SELECT *
+      FROM Contact
+      WHERE (phonenumber = '${phoneNumber}' OR email = '${email}')
+      AND (phonenumber IS NOT NULL OR email IS NOT NULL)
+      AND (linkprecedence = 'secondary')
+  `);
+
+  // If repeated email and phone number is not allowed, uncomment it out if you would want it.
+
+  // items.rows.forEach((e) => {
+  //   cntId.push(e.ids);
+  //   if (!phoneNumbers.includes(e.phonenumber) && e.phonenumber !== "null") {
+  //     phoneNumbers.push(e.phonenumber);
+  //   }
+  //   if (!emails.includes(e.email) && e.email !== "null") {
+  //     emails.push(e.email);
+  //   }
+  // });
+
+  // If repeated email and phone number is allowed and null is also allowed
+  items.rows.forEach((e) => {
+    cntId.push(e.ids);
+    phoneNumbers.push(e.phonenumber);
+    emails.push(e.email);
   });
 
   let retrnObj = {
