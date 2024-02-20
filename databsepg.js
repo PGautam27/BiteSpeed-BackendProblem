@@ -1,5 +1,4 @@
 const { Client } = require("pg");
-const { isNull } = require("util");
 
 const client = new Client({
   hot: "localhost",
@@ -9,66 +8,35 @@ const client = new Client({
   database: "postgres",
 });
 
-// client.query(
-//   `
-//     SELECT *
-//     FROM Contact
-//     WHERE (phoneNumber = 'null' OR email = 'example1@example.com')
-//     and (linkprecedence = 'primary')
-//   `,
-//   (err, res) => {
-//     if (err) {
-//       console.log("Here it's terminating", err.message);
-//     } else {
-//       console.log(res.rows);
-//     }
-//     client.end();
-//   }
-// );
-
-// client.query("SELECT * FROM contact", (err, res) => {
-//   if (err) {
-//     console.log(err.message);
-//   } else {
-//     console.log(res.rows);
-//   }
-//   client.end();
-// });
-
 const postContact = async (req) => {
-  //   const isemailNull = req.email === null || req.email === undefined;
-  //   const isphoneNumber =
-  //     req.phoneNumber === null || req.phoneNumber === undefined;
+  const isemailNull = req.email === null || req.email === undefined;
+  const isphoneNumber =
+    req.phoneNumber === null || req.phoneNumber === undefined;
 
-  //   if (isemailNull && isphoneNumber) {
-  //     return { message: "NOT VALID CONTACT" };
-  //   } else {
-  //   }
+  if (isemailNull && isphoneNumber) {
+    return { message: "NOT VALID CONTACT" };
+  } else {
+  }
 
   const x = await insertIntoContact("mello@gmail.com");
 };
 
-// const insertIntoContact = async (email, phoneNumber) => {
-//   let contacts = [];
+const createContactTable = async () => {
+  client.connect();
 
-//   return client.query(
-//     `
-//     SELECT *
-//     FROM Contact
-//     WHERE (phoneNumber = '${phoneNumber}' OR email = '${email}')
-//     AND (phoneNumber IS NOT NULL OR email IS NOT NULL);
-//   `,
-//     async (err, res) => {
-//       if (err) {
-//         console.log("Here it's terminating", err.message);
-//       } else {
-//         console.log(res.rows);
-//         return res.rows;
-//       }
-//       client.end();
-//     }
-//   );
-// };
+  await client.query(`
+    CREATE TABLE Contact(
+    ids SERIAL PRIMARY KEY,
+    phoneNumber VARCHAR(20),
+    email VARCHAR(50),
+    linkedId INT,
+    linkPrecedence VARCHAR(50) NOT NULL,
+    createdAT TIMESTAMP NOT NULL,
+    updatedAt TIMESTAMP NOT NULL,
+    deletedAt TIMESTAMP,
+    FOREIGN KEY (linkedId) REFERENCES Contact(ids)
+  );`);
+};
 
 const insertIntoContact = async (email, phoneNumber) => {
   client.connect();
