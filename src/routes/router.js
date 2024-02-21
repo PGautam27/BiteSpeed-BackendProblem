@@ -1,4 +1,4 @@
-const { insertIntoContact } = require("../db/databasepg.js");
+const { insertIntoContact } = require("../db/db_service.js");
 const express = require("express");
 const router = express.Router();
 

@@ -152,7 +152,7 @@ const insertIntoContact = async (email, phoneNumber) => {
 
   // Initialize the arrays and set the primarycontactId
   if (contacts.rows.length === 0) {
-    phoneNumber = [phoneNumber];
+    phoneNumbers = [phoneNumber];
     emails = [email];
 
     let currItem = await client.query(`
