@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
+const { client } = require("./src/db/db_connection.js");
 
 const cors = require("cors");
 app.use(express.static("public"));
@@ -12,3 +13,5 @@ const router = require("./src/routes/router");
 app.use("/", router);
 
 app.listen(port);
+
+client.connect();

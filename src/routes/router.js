@@ -1,4 +1,4 @@
-const { insertIntoContact } = require("../db/db_service.js");
+const { insertIntoContact } = require("../utils/utils.js");
 const express = require("express");
 const router = express.Router();
 
@@ -9,7 +9,7 @@ router.post("/identify", async (req, res) => {
   const isphoneNumber = phoneNumber === null || phoneNumber === undefined;
 
   if (isemailNull && isphoneNumber) {
-    res.status(400).json({ message: "NOT VALID CONTACT" });
+    res.status(400).json({ message: "NOT_VALID_CONTACT" });
   } else {
     const contactObj = await insertIntoContact(email, phoneNumber);
     res.status(200).json(contactObj);

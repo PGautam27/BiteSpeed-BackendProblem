@@ -1,16 +1,6 @@
-const { Client } = require("pg");
-
-const client = new Client({
-  hot: "localhost",
-  user: "postgres",
-  port: 5432,
-  password: "root123",
-  database: "postgres",
-});
+const { client } = require("../db/db_connection.js");
 
 const createContactTable = async () => {
-  client.connect();
-
   await client.query(`
     CREATE TABLE Contact(
     ids SERIAL PRIMARY KEY,
@@ -26,8 +16,6 @@ const createContactTable = async () => {
 };
 
 const insertIntoContact = async (email, phoneNumber) => {
-  client.connect();
-
   // Check if email is null or undefined
   if (email === undefined || email === null) {
     email = "null";
@@ -205,8 +193,6 @@ const insertIntoContact = async (email, phoneNumber) => {
     },
   };
 
-  client.end();
-
   console.log(retrnObj);
 
   return retrnObj;
@@ -214,4 +200,5 @@ const insertIntoContact = async (email, phoneNumber) => {
 
 module.exports = {
   insertIntoContact,
+  createContactTable,
 };
