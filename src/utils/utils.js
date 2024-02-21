@@ -166,22 +166,22 @@ const insertIntoContact = async (email, phoneNumber) => {
 
   // If repeated email and phone number is not allowed, uncomment it out if you would want it.
 
-  // items.rows.forEach((e) => {
-  //   cntId.push(e.ids);
-  //   if (!phoneNumbers.includes(e.phonenumber) && e.phonenumber !== "null") {
-  //     phoneNumbers.push(e.phonenumber);
-  //   }
-  //   if (!emails.includes(e.email) && e.email !== "null") {
-  //     emails.push(e.email);
-  //   }
-  // });
-
-  // If repeated email and phone number is allowed and null is also allowed
   items.rows.forEach((e) => {
     cntId.push(e.ids);
-    phoneNumbers.push(e.phonenumber);
-    emails.push(e.email);
+    if (!phoneNumbers.includes(e.phonenumber) && e.phonenumber !== "null") {
+      phoneNumbers.push(e.phonenumber);
+    }
+    if (!emails.includes(e.email) && e.email !== "null") {
+      emails.push(e.email);
+    }
   });
+
+  // If repeated email and phone number is allowed and null is also allowed
+  // items.rows.forEach((e) => {
+  //   cntId.push(e.ids);
+  //   phoneNumbers.push(e.phonenumber);
+  //   emails.push(e.email);
+  // });
 
   // Create the return object
   let retrnObj = {
